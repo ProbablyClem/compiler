@@ -2,16 +2,18 @@
 
 define i32 @main() {
 entry:
-%0 = add i32 0, 2
-%1 = add i32 0, 3
-%2 = add i32 0, 5
-store i32 mul i32 (%1, %2), i32 %1, 
-%0 = add i32 %0, %1
-%1 = add i32 0, 8
-%2 = add i32 0, 3
-%1 = udiv i32 %1, %2
-%0 = sub i32 %0, %1
-call i32 @printf(i8* getelementptr ([2 x i8], [2 x i8]* @formatString , i32 0, i32 0), i32 %d)
+%0 = add i32 0, 13
+%1 = add i32 0, 6
+%2 = sub i32 %0, %1
+%3 = add i32 0, 4
+%4 = add i32 0, 5
+%5 = mul i32 %3, %4
+%6 = add i32 %2, %5
+%7 = add i32 0, 8
+%8 = add i32 0, 3
+%9 = udiv i32 %7, %8
+%10 = add i32 %6, %9
+call i32 @printf(i8* getelementptr ([2 x i8], [2 x i8]* @formatString , i32 0, i32 0), i32 %10)
 	ret i32 1
 }
 

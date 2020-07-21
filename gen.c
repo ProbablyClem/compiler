@@ -35,7 +35,6 @@ static int genAST(struct ASTnode *n) {
 
 void generatecode(struct ASTnode *n) {
   int reg;
-  freeall_registers();
   cgpreamble();
   reg= genAST(n);
   cgprintint(reg);
