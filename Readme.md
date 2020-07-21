@@ -66,3 +66,7 @@ Expose public functions.
 ### defs.h
 Public Enums
 
+# Ressources
+Compiler tutorial : https://github.com/DoctorWkt/acwj </br>
+LLVM IR doc : http://llvm.org/docs/LangRef.html </br>
+LLVM IR unofficial guide : https://mapping-high-level-constructs-to-llvm-ir.readthedocs.io/en/latest/README.html </br>
