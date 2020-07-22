@@ -24,7 +24,6 @@ static void usage(char *prog) {
 // if we don't have an argument. Open up the input
 // file and call scanfile() to scan the tokens in it.
 void main(int argc, char *argv[]) {
-  struct ASTnode *n;
 
   if (argc != 2)
     usage(argv[0]);
@@ -36,18 +35,48 @@ void main(int argc, char *argv[]) {
     fprintf(stderr, "Unable to open %s: %s\n", argv[1], strerror(errno));
     exit(1);
   }
-
   // Create the output file
   if ((Outfile = fopen("out.ll", "w")) == NULL) {
     fprintf(stderr, "Unable to create out.ll: %s\n", strerror(errno));
     exit(1);
   }
 
+  // Create the header file (temporary file containing everyhting in the header)
+  if ((Header = fopen("header.ll", "w")) == NULL) {
+    fprintf(stderr, "Unable to create header.ll: %s\n", strerror(errno));
+    exit(1);
+  }
   scan(&Token);			// Get the first token from the input
-  n = binexpr(0);		// Parse the expression in the file
-  printf("%d\n", interpretAST(n));	// Calculate the final result
-  generatecode(n);
+  genpreamble();		// Output the preamble
+  statements();			// Parse the statements in the input
+  genpostamble();		// Output the postamble
+  fclose(Outfile);		// Close the output file and exit
+  fclose(Header);
 
-  fclose(Outfile);
+  // append the content of Outfile into the header
+
+  if ((Outfile = fopen("out.ll", "r")) == NULL) {
+    fprintf(stderr, "Unable to read out.ll: %s\n", strerror(errno));
+    exit(1);
+  }
+
+  // Create the header file (temporary file containing everyhting in the header)
+  if ((Header = fopen("header.ll", "a")) == NULL) {
+    fprintf(stderr, "Unable to appen to header.ll: %s\n", strerror(errno));
+    exit(1);
+  }
+
+  char c = fgetc(Outfile);
+
+  while (c != EOF)
+  {
+        fputc(c,Header);
+        c = fgetc(Outfile);
+  }
+  fclose(Outfile);		// Close the output file and exit
+  fclose(Header);
+
+  remove("out.ll"); //delete the body file
+  rename("header.ll", "out.ll"); //rename the header into the final file
   exit(0);
 }

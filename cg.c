@@ -8,14 +8,15 @@
 
 //generate preambule
 void cgpreamble(){
-  fprintf(Outfile, "@formatString = private constant [2 x i8] c\"%%d\" \n\n");
+  fprintf(Outfile, "@formatString = private constant [3 x i8] c\"%%d\\00\"\n");
+  fprintf(Outfile, "@formatStringendl = private constant [5 x i8] c\"%%d \\0A\\00\" \n\n");
   fprintf(Outfile, "define i32 @main() {\n");
   fprintf(Outfile, "entry:\n");
 }
 
 //genrate postambule
 void cgpostamble(){
-  fprintf(Outfile, "\tret i32 1\n");
+  fprintf(Outfile, "\tret i32 0\n");
   fprintf(Outfile, "}\n\n");
   fprintf(Outfile, "declare i32 @printf(i8*, i32)");
 }
@@ -41,7 +42,7 @@ static int alloc_register(void)
 
 // Load an integer literal value into a register.
 // Return the number of the register
-int cgload(int value) {
+int cgloadint(int value) {
 
   // Get a new register
   int r= alloc_register();
@@ -50,6 +51,30 @@ int cgload(int value) {
   fprintf(Outfile, "%%%d = add i32 0, %d\n", r, value);
   return(r);
 }
+
+// Load a value from a variable into a register.
+// Return the number of the register
+int cgloadglob(char *identifier) {
+  // Get a new register
+  int r = alloc_register();
+
+  // Print out the code to initialise it
+  fprintf(Outfile, "%%%d = load i32, i32* @%s\n", r, identifier);
+  return (r);
+}
+
+//todo
+// Store a register's value into a variable
+int cgstorglob(int reg, char *identifier) {
+  fprintf(Outfile, "store i32 %%%d, i32* @%s\n", reg, identifier);
+  return (reg);
+}
+
+// Generate a global symbol
+void cgglobsym(char *sym) {
+  fprintf(Header, "@%s = global i32 0\n", sym);
+}
+
 
 // Add two registers together and return
 // the number of the register with the result
@@ -90,6 +115,13 @@ int cgdiv(int r1, int r2) {
 }
 
 // Call printint() with the given register
-void cgprintint(int r) {
-  fprintf(Outfile, "call i32 @printf(i8* getelementptr ([2 x i8], [2 x i8]* @formatString , i32 0, i32 0), i32 %%%d)\n", r);
+void cgprintint(int r1) {
+  int r = alloc_register();
+  fprintf(Outfile, "%%%d = call i32 @printf(i8* getelementptr ([3 x i8], [3 x i8]* @formatString , i32 0, i32 0), i32 %%%d)\n",r, r1);
+}
+
+// print int with \n
+void cgprintlnint(int r1) {
+  int r = alloc_register();
+  fprintf(Outfile, "%%%d = call i32 @printf(i8* getelementptr ([5 x i8], [5 x i8]* @formatStringendl , i32 0, i32 0), i32 %%%d)\n",r, r1);
 }
