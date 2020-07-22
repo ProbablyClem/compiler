@@ -2,9 +2,25 @@
 #include "data.h"
 #include "decl.h"
 
+// Parsing of statements
+// Copyright (c) 2019 Warren Toomey, GPL3
+
+// statements: statement
+//      |      statement statements
+//      ;
+//
+// statement: 'print' expression ';'
+//      |     'int'   identifier ';'
+//      |     identifier '=' expression ';'
+//      ;
+//
+// identifier: T_IDENT
+//      ;
+
 void print_statement(void) {
   struct ASTnode *tree;
   int reg;
+
   // Match a 'print' as the first token
   match(T_PRINT, "print");
 
@@ -13,22 +29,6 @@ void print_statement(void) {
   tree = binexpr(0);
   reg = genAST(tree, -1);
   genprintint(reg);
-
-  // Match the following semicolon
-  semi();
-}
-
-void println_statement(void) {
-  struct ASTnode *tree;
-  int reg;
-  // Match a 'print' as the first token
-  match(T_PRINTLN, "println");
-
-  // Parse the following expression and
-  // generate the assembly code
-  tree = binexpr(0);
-  reg = genAST(tree, -1);
-  genprintlnint(reg);
 
   // Match the following semicolon
   semi();
@@ -48,7 +48,7 @@ void assignment_statement(void) {
   right = mkastleaf(A_LVIDENT, id);
 
   // Ensure we have an equals sign
-  match(T_EQUALS, "=");
+  match(T_ASSIGN, "=");
 
   // Parse the following expression
   left = binexpr(0);
@@ -63,6 +63,7 @@ void assignment_statement(void) {
   semi();
 }
 
+
 // Parse one or more statements
 void statements(void) {
 
@@ -70,9 +71,6 @@ void statements(void) {
     switch (Token.token) {
     case T_PRINT:
       print_statement();
-      break;
-    case T_PRINTLN:
-      println_statement();
       break;
     case T_INT:
       var_declaration();

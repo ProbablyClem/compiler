@@ -1,3 +1,6 @@
+
+// Function prototypes for all compiler files
+// Copyright (c) 2019 Warren Toomey, GPL3
 // scan.c
 int scan(struct token *t);
 
@@ -13,7 +16,6 @@ void genpreamble();
 void genpostamble();
 void genfreeregs();
 void genprintint(int reg);
-void genprintlnint(int reg);
 void genglobsym(char *s);
 
 // cg.c
@@ -27,9 +29,14 @@ int cgsub(int r1, int r2);
 int cgmul(int r1, int r2);
 int cgdiv(int r1, int r2);
 void cgprintint(int r);
-void cgprintlnint(int r);
 int cgstorglob(int r, char *identifier);
 void cgglobsym(char *sym);
+int cgequal(int r1, int r2);
+int cgnotequal(int r1, int r2);
+int cglessthan(int r1, int r2);
+int cggreaterthan(int r1, int r2);
+int cglessequal(int r1, int r2);
+int cggreaterequal(int r1, int r2);
 
 // expr.c
 struct ASTnode *binexpr(int ptp);

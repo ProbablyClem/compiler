@@ -5,24 +5,6 @@
 // Parsing of expressions
 // Copyright (c) 2019 Warren Toomey, GPL3
 
-
-// Operator precedence for each token
-static int OpPrec[] = { 0, 10, 10, 20, 20,    0 };
-//                     EOF  +   -   *   /  INTLIT
-
-// Check that we have a binary operator and
-// return its precedence.
-static int op_precedence(int tokentype) {
-  int prec = OpPrec[tokentype];
-  if (prec == 0) {
-    fprintf(stderr, "syntax error on line %d, token %d\n", Line, tokentype);
-    exit(1);
-  }
-  return (prec);
-}
-
-// Parse a primary factor and return an
-// AST node representing it.
 // Parse a primary factor and return an
 // AST node representing it.
 static struct ASTnode *primary(void) {
@@ -55,23 +37,31 @@ static struct ASTnode *primary(void) {
 }
 
 
-// Convert a token into an AST operation.
-int arithop(int tok) {
-  switch (tok) {
-    case T_PLUS:
-      return (A_ADD);
-    case T_MINUS:
-      return (A_SUBTRACT);
-    case T_STAR:
-      return (A_MULTIPLY);
-    case T_SLASH:
-      return (A_DIVIDE);
-    default:
-      fprintf(stderr, "unknown token in arithop() on line %d\n", Line);
-      exit(1);
-  }
+// Convert a binary operator token into an AST operation.
+// We rely on a 1:1 mapping from token to AST operation
+static int arithop(int tokentype) {
+  if (tokentype > T_EOF && tokentype < T_INTLIT)
+    return(tokentype);
+  fatald("Syntax error, token", tokentype);
 }
 
+// Operator precedence for each token. Must
+// match up with the order of tokens in defs.h
+static int OpPrec[] = {
+  0, 10, 10,			// T_EOF, T_PLUS, T_MINUS
+  20, 20,			// T_STAR, T_SLASH
+  30, 30,			// T_EQ, T_NE
+  40, 40, 40, 40		// T_LT, T_GT, T_LE, T_GE
+};
+
+// Check that we have a binary operator and
+// return its precedence.
+static int op_precedence(int tokentype) {
+  int prec = OpPrec[tokentype];
+  if (prec == 0)
+    fatald("Syntax error, token", tokentype);
+  return (prec);
+}
 
 // Return an AST tree whose root is a binary operator.
 // Parameter ptp is the previous token's precedence.
@@ -79,7 +69,7 @@ struct ASTnode *binexpr(int ptp) {
   struct ASTnode *left, *right;
   int tokentype;
 
-  // Get the integer literal on the left.
+  // Get the primary tree on the left.
   // Fetch the next token at the same time.
   left = primary();
 

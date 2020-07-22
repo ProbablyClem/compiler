@@ -125,3 +125,17 @@ void cgprintlnint(int r1) {
   int r = alloc_register();
   fprintf(Outfile, "%%%d = call i32 @printf(i8* getelementptr ([5 x i8], [5 x i8]* @formatStringendl , i32 0, i32 0), i32 %%%d)\n",r, r1);
 }
+
+// Compare two registers.
+static int cgcompare(int r1, int r2, char *how) {
+  int r = alloc_register();
+  fprintf(Outfile, "%%%d = icmp %s i32 %%%d, %%%d \n",r ,how,r1 , r2);
+  return (r);
+}
+
+int cgequal(int r1, int r2) { return(cgcompare(r1, r2, "eq")); }
+int cgnotequal(int r1, int r2) { return(cgcompare(r1, r2, "ne")); }
+int cglessthan(int r1, int r2) { return(cgcompare(r1, r2, "ult")); }
+int cggreaterthan(int r1, int r2) { return(cgcompare(r1, r2, "ugt")); }
+int cglessequal(int r1, int r2) { return(cgcompare(r1, r2, "ule")); }
+int cggreaterequal(int r1, int r2) { return(cgcompare(r1, r2, "uge")); }

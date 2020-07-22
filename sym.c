@@ -11,6 +11,7 @@ static int Globs = 0;		// Position of next free global symbol slot
 // Return its slot position or -1 if not found.
 int findglob(char *s) {
   int i;
+
   for (i = 0; i < Globs; i++) {
     if (*s == *Gsym[i].name && !strcmp(s, Gsym[i].name))
       return (i);

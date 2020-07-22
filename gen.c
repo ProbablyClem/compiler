@@ -5,19 +5,16 @@
 // Generic code generator
 // Copyright (c) 2019 Warren Toomey, GPL3
 
-// Given an AST, generate
-// assembly code recursively
+// Given an AST, generate assembly code recursively.
+// Return the register id with the tree's final value
 int genAST(struct ASTnode *n, int reg) {
   int leftreg, rightreg;
 
   // Get the left and right sub-tree values
-  if (n->left){
+  if (n->left)
     leftreg = genAST(n->left, -1);
-  }
-
-  if (n->right){
+  if (n->right)
     rightreg = genAST(n->right, leftreg);
-  }
 
   switch (n->op) {
   case A_ADD:
@@ -28,6 +25,18 @@ int genAST(struct ASTnode *n, int reg) {
     return (cgmul(leftreg, rightreg));
   case A_DIVIDE:
     return (cgdiv(leftreg, rightreg));
+  case A_EQ:
+    return (cgequal(leftreg, rightreg));
+  case A_NE:
+    return (cgnotequal(leftreg, rightreg));
+  case A_LT:
+    return (cglessthan(leftreg, rightreg));
+  case A_GT:
+    return (cggreaterthan(leftreg, rightreg));
+  case A_LE:
+    return (cglessequal(leftreg, rightreg));
+  case A_GE:
+    return (cggreaterequal(leftreg, rightreg));
   case A_INTLIT:
     return (cgloadint(n->v.intvalue));
   case A_IDENT:
@@ -55,8 +64,6 @@ void genprintint(int reg) {
   cgprintint(reg);
 }
 
-void genprintlnint(int reg){
-  cgprintlnint(reg);
+void genglobsym(char *s) {
+  cgglobsym(s);
 }
-
-void genglobsym(char *s) { cgglobsym(s); }

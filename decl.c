@@ -2,6 +2,9 @@
 #include "data.h"
 #include "decl.h"
 
+// Parsing of declarations
+// Copyright (c) 2019 Warren Toomey, GPL3
+
 
 // Parse the declaration of a variable
 void var_declaration(void) {
