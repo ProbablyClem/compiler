@@ -72,7 +72,7 @@ int cgstorglob(int reg, char *identifier) {
 
 // Generate a global symbol
 void cgglobsym(char *sym) {
-  fprintf(Header, "@%s = global i32 0\n", sym);
+  fprintf(Header, "@%s = dso_local global i32 0, align 4\n", sym);
 }
 
 
@@ -126,16 +126,59 @@ void cgprintlnint(int r1) {
   fprintf(Outfile, "%%%d = call i32 @printf(i8* getelementptr ([5 x i8], [5 x i8]* @formatStringendl , i32 0, i32 0), i32 %%%d)\n",r, r1);
 }
 
-// Compare two registers.
-static int cgcompare(int r1, int r2, char *how) {
+//cast the bool register to i32
+int cgbooltoi32(int r1){
   int r = alloc_register();
-  fprintf(Outfile, "%%%d = icmp %s i32 %%%d, %%%d \n",r ,how,r1 , r2);
+  fprintf(Outfile, "%%%d = zext i1 %%%d to i32\n", r, r1);
+  return r;
+}
+
+//cast the bool register to i32
+int cgi32tobool(int r1){
+  int r = alloc_register();
+  fprintf(Outfile, "%%%d = trunc i32 %%%d to i1\n", r, r1);
+  return r;
+}
+
+// List of comparison instructions,
+// in AST order: A_EQ, A_NE, A_LT, A_GT, A_LE, A_GE
+static char *cmplist[] =
+  { "eq", "ne", "ult", "ugt", "ule", "uge" };
+
+// Compare two registers and set if true.
+int cgcompare_and_set(int ASTop, int r1, int r2) {
+
+  // Check the range of the AST operation
+  if (ASTop < A_EQ || ASTop > A_GE)
+    fatal("Bad ASTop in cgcompare_and_set()");
+  int r  = alloc_register();
+  fprintf(Outfile, "%%%d = icmp %s i32 %%%d, %%%d \n",r ,cmplist[ASTop - A_EQ],r1 , r2);
+  r = cgbooltoi32(r);
   return (r);
 }
 
-int cgequal(int r1, int r2) { return(cgcompare(r1, r2, "eq")); }
-int cgnotequal(int r1, int r2) { return(cgcompare(r1, r2, "ne")); }
-int cglessthan(int r1, int r2) { return(cgcompare(r1, r2, "ult")); }
-int cggreaterthan(int r1, int r2) { return(cgcompare(r1, r2, "ugt")); }
-int cglessequal(int r1, int r2) { return(cgcompare(r1, r2, "ule")); }
-int cggreaterequal(int r1, int r2) { return(cgcompare(r1, r2, "uge")); }
+
+// Compare two registers and jump if false.
+int cgcompare_and_jump(int ASTop, int r1, int r2, int label) {
+  // Check the range of the AST operation
+  if (ASTop < A_EQ || ASTop > A_GE)
+    fatal("Bad ASTop in cgcompare_and_set()");
+
+  int r = cgcompare_and_set(ASTop, r1, r2);
+  r = cgi32tobool(r);
+  // alloc_register();
+  // br i1 %cond, label %IfEqual, label %IfUnequal
+  fprintf(Outfile, "br i1 %%%d, label %%L-%d, label %%L%d\n",r, label, label);
+  cglabel(label * -1);
+  return (NOREG);
+}
+
+// Generate a label
+void cglabel(int l) {
+  fprintf(Outfile, "L%d:\n", l);
+}
+
+// Generate a jump to a label
+void cgjump(int l) {
+  fprintf(Outfile, "br label %%L%d\n", l);
+}

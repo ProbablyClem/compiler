@@ -12,23 +12,23 @@ static struct ASTnode *primary(void) {
   int id;
 
   switch (Token.token) {
-  case T_INTLIT:
-    // For an INTLIT token, make a leaf AST node for it.
-    n = mkastleaf(A_INTLIT, Token.intvalue);
-    break;
+    case T_INTLIT:
+      // For an INTLIT token, make a leaf AST node for it.
+      n = mkastleaf(A_INTLIT, Token.intvalue);
+      break;
 
-  case T_IDENT:
-    // Check that this identifier exists
-    id = findglob(Text);
-    if (id == -1)
-      fatals("Unknown variable", Text);
+    case T_IDENT:
+      // Check that this identifier exists
+      id = findglob(Text);
+      if (id == -1)
+	fatals("Unknown variable", Text);
 
-    // Make a leaf AST node for it
-    n = mkastleaf(A_IDENT, id);
-    break;
+      // Make a leaf AST node for it
+      n = mkastleaf(A_IDENT, id);
+      break;
 
-  default:
-    fatald("Syntax error, token", Token.token);
+    default:
+      fatald("Syntax error, token", Token.token);
   }
 
   // Scan in the next token and return the leaf node
@@ -41,7 +41,7 @@ static struct ASTnode *primary(void) {
 // We rely on a 1:1 mapping from token to AST operation
 static int arithop(int tokentype) {
   if (tokentype > T_EOF && tokentype < T_INTLIT)
-    return(tokentype);
+    return (tokentype);
   fatald("Syntax error, token", tokentype);
 }
 
@@ -73,9 +73,9 @@ struct ASTnode *binexpr(int ptp) {
   // Fetch the next token at the same time.
   left = primary();
 
-  // If we hit a semicolon, return just the left node
+  // If we hit a semicolon or ')', return just the left node
   tokentype = Token.token;
-  if (tokentype == T_SEMI)
+  if (tokentype == T_SEMI || tokentype == T_RPAREN)
     return (left);
 
   // While the precedence of this token is
@@ -90,12 +90,12 @@ struct ASTnode *binexpr(int ptp) {
 
     // Join that sub-tree with ours. Convert the token
     // into an AST operation at the same time.
-    left = mkastnode(arithop(tokentype), left, right, 0);
+    left = mkastnode(arithop(tokentype), left, NULL, right, 0);
 
     // Update the details of the current token.
-    // If we hit a semicolon, return just the left node
+    // If we hit a semicolon or ')', return just the left node
     tokentype = Token.token;
-    if (tokentype == T_SEMI)
+    if (tokentype == T_SEMI || tokentype == T_RPAREN)
       return (left);
   }
 
