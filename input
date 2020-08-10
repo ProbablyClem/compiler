@@ -1,6 +1,13 @@
-{
+fn main() {
   int i;
-  for (i= 1; i <= 10; i= i + 1) {
-    print i;
-  }
+  i = 0;
+  i = i +1;
+  print i;
+}
+
+fn func() {
+  int i;
+  i = 5;
+  i = i +1;
+  print i;
 }

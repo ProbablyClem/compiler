@@ -46,10 +46,15 @@ void main(int argc, char *argv[]) {
     fprintf(stderr, "Unable to create header.ll: %s\n", strerror(errno));
     exit(1);
   }
-  scan(&Token);			// Get the first token from the input
-  genpreamble();		// Output the preamble
-  tree = compound_statement();	// Parse the compound statement in the input
-  genAST(tree, NOREG, 0);	// Generate the assembly code for it
+  
+  scan(&Token);                 // Get the first token from the input
+  genpreamble();                // Output the preamble
+  while (1) {                   // Parse a function and
+    tree = function_declaration();
+    genAST(tree, NOREG, 0);     // generate the assembly code for it
+    if (Token.token == T_EOF)   // Stop when we have reached EOF
+      break;
+  }
   genpostamble();		// Output the postamble
   fclose(Outfile);		// Close the output file and exit
   fclose(Header);

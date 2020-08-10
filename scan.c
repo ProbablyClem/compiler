@@ -101,6 +101,8 @@ static int keyword(char *s) {
     case 'f':
     if(!strcmp(s, "for"))
       return (T_FOR);
+    else if (!strcmp(s, "fn"))
+      return (T_FN);
     case 'i':
       if (!strcmp(s, "if"))
       	return (T_IF);

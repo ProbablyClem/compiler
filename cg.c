@@ -10,15 +10,25 @@
 void cgpreamble(){
   fprintf(Outfile, "@formatString = private constant [3 x i8] c\"%%d\\00\"\n");
   fprintf(Outfile, "@formatStringendl = private constant [5 x i8] c\"%%d \\0A\\00\" \n\n");
-  fprintf(Outfile, "define i32 @main() {\n");
-  fprintf(Outfile, "entry:\n");
+  // fprintf(Outfile, "define i32 @main() {\n");
+  // fprintf(Outfile, "entry:\n");
 }
 
 //genrate postambule
 void cgpostamble(){
-  fprintf(Outfile, "\tret i32 0\n");
-  fprintf(Outfile, "}\n\n");
   fprintf(Outfile, "declare i32 @printf(i8*, i32)");
+}
+
+// Print out a function preamble
+void cgfuncpreamble(char *name) {
+  fprintf(Outfile, "define i32 @%s() nounwind {\n", name);
+  fprintf(Outfile, "entry:\n");
+}
+
+// Print out a function postamble
+void cgfuncpostamble() {
+  fprintf(Outfile, "\t ret i32 0\n");
+  fprintf(Outfile, "} \n");
 }
 
 //list all register

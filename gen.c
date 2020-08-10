@@ -3,7 +3,6 @@
 #include "decl.h"
 
 // Generic code generator
-// Copyright (c) 2019 Warren Toomey, GPL3
 
 // Generate and return a new label number
 int label(void) {
@@ -93,12 +92,20 @@ int genAST(struct ASTnode *n, int reg, int parentASTop) {
     case A_IF:
       return (genIFAST(n));
     case A_WHILE:
-      return(genWHILEAST(n));
+      return (genWHILEAST(n));
     case A_GLUE:
       // Do each child statement, and free the
       // registers after each child
       genAST(n->left, NOREG, n->op);
+      // genfreeregs();
       genAST(n->right, NOREG, n->op);
+      genfreeregs();
+      return (NOREG);
+    case A_FUNCTION:
+      // Generate the function's preamble before the code
+      cgfuncpreamble(Gsym[n->v.id].name);
+      genAST(n->left, NOREG, n->op);
+      cgfuncpostamble();
       return (NOREG);
   }
 
@@ -125,13 +132,13 @@ int genAST(struct ASTnode *n, int reg, int parentASTop) {
     case A_GT:
     case A_LE:
     case A_GE:
-      // If the parent AST node is an A_IF, generate a compare
-      // followed by a jump. Otherwise, compare registers and
-      // set one to 1 or 0 based on the comparison.
+      // If the parent AST node is an A_IF or A_WHILE, generate
+      // a compare followed by a jump. Otherwise, compare registers
+      // and set one to 1 or 0 based on the comparison.
       if (parentASTop == A_IF || parentASTop == A_WHILE)
-	        return (cgcompare_and_jump(n->op, leftreg, rightreg, reg));
+	return (cgcompare_and_jump(n->op, leftreg, rightreg, reg));
       else
-	  return (cgcompare_and_set(n->op, leftreg, rightreg));
+	return (cgcompare_and_set(n->op, leftreg, rightreg));
     case A_INTLIT:
       return (cgloadint(n->v.intvalue));
     case A_IDENT:
@@ -145,6 +152,7 @@ int genAST(struct ASTnode *n, int reg, int parentASTop) {
       // Print the left-child's value
       // and return no register
       genprintint(leftreg);
+      genfreeregs();
       return (NOREG);
     default:
       fatald("Unknown AST operator", n->op);
@@ -158,7 +166,7 @@ void genpostamble() {
   cgpostamble();
 }
 void genfreeregs() {
-  freeall_registers();
+  // freeall_registers();
 }
 void genprintint(int reg) {
   cgprintint(reg);
