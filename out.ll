@@ -16,7 +16,6 @@ store i32 %3, i32* @i
 	 ret i32 0
 } 
 define i32 @func() nounwind {
-entry:
 %6 = add i32 0, 5
 store i32 %6, i32* @i
 %7 = load i32, i32* @i

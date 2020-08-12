@@ -22,7 +22,9 @@ void cgpostamble(){
 // Print out a function preamble
 void cgfuncpreamble(char *name) {
   fprintf(Outfile, "define i32 @%s() nounwind {\n", name);
-  fprintf(Outfile, "entry:\n");
+  if (!strcmp(name, "main")){
+    fprintf(Outfile, "entry:\n");
+  }
 }
 
 // Print out a function postamble
