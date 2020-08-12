@@ -6,13 +6,26 @@
 // Copyright (c) 2019 Warren Toomey, GPL3
 
 
-// Parse the declaration of a variable
-void var_declaration(void) {
+// // Parse the declaration of a variable
+// void var_declaration(void) {
 
-  // Ensure we have an 'int' token followed by an identifier
+//   // Ensure we have an 'int' token followed by an identifier
+//   // and a semicolon. Text now has the identifier's name.
+//   // Add it as a known identifier
+//   match(T_INT, "int");
+//   ident();
+//   addglob(Text);
+//   genglobsym(Text);
+//   semi();
+// }
+
+// Parse the declaration of a global variable
+void global_declaration(void) {
+
+  // Ensure we have an 'global' token followed by an identifier
   // and a semicolon. Text now has the identifier's name.
   // Add it as a known identifier
-  match(T_INT, "int");
+  match(T_GLOBAL, "global");
   ident();
   addglob(Text);
   genglobsym(Text);

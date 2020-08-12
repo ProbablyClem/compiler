@@ -36,7 +36,7 @@ int addglob(char *name) {
 
   // If this is already in the symbol table, return the existing slot
   if ((y = findglob(name)) != -1)
-    return (y);
+    fatal("global already exist");
 
   // Otherwise get a new slot, fill it in and
   // return the slot number

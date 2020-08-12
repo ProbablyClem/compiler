@@ -64,4 +64,5 @@ int addglob(char *name);
 
 // decl.c
 void var_declaration(void);
+void global_declaration(void);
 struct ASTnode *function_declaration(void);

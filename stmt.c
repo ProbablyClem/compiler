@@ -185,8 +185,9 @@ static struct ASTnode *single_statement(void) {
   switch (Token.token) {
     case T_PRINT:
       return (print_statement());
-    case T_INT:
-      var_declaration();
+    case T_GLOBAL:
+    // var_declaration();
+      global_declaration();
       return (NULL);		// No AST generated here
     case T_IDENT:
       return (assignment_statement());

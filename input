@@ -1,12 +1,12 @@
 fn main() {
-  int i;
+  global i;
   i = 0;
   i = i +1;
   print i;
 }
 
 fn func() {
-  int i;
+  global i;
   i = 5;
   i = i +1;
   print i;

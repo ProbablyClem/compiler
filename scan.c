@@ -103,11 +103,15 @@ static int keyword(char *s) {
       return (T_FOR);
     else if (!strcmp(s, "fn"))
       return (T_FN);
+      break;
+    case 'g':
+    if (!strcmp(s, "global"))
+	      return (T_GLOBAL);
+        break;
     case 'i':
       if (!strcmp(s, "if"))
       	return (T_IF);
-      if (!strcmp(s, "int"))
-	      return (T_INT);
+      
       break;
     case 'p':
       if (!strcmp(s, "print"))
