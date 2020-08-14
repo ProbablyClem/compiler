@@ -1,13 +1,14 @@
 fn main() {
-  global i;
+  global i : int;
   i = 0;
   i = i +1;
   print i;
 }
 
 fn func() {
-  global i;
-  i = 5;
-  i = i +1;
+  global y : bool;
+  y = true;
+  print y;
+  i = y;
   print i;
 }

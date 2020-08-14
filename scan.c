@@ -94,6 +94,12 @@ static int scanident(int c, char *buf, int lim) {
 // to waste time strcmp()ing against all the keywords.
 static int keyword(char *s) {
   switch (*s) {
+    case 'b':
+      if(!strcmp(s, "bool"))
+          return (T_BOOL);
+    case 'c':
+      if(!strcmp(s, "char"))
+          return (T_CHAR);
     case 'e':
       if (!strcmp(s, "else"))
 	      return (T_ELSE);
@@ -101,17 +107,23 @@ static int keyword(char *s) {
     case 'f':
     if(!strcmp(s, "for"))
       return (T_FOR);
-    else if (!strcmp(s, "fn"))
+    if (!strcmp(s, "fn"))
       return (T_FN);
+    if (!strcmp(s, "false"))
+      return (T_FALSE);
       break;
     case 'g':
     if (!strcmp(s, "global"))
 	      return (T_GLOBAL);
         break;
+    case 't':
+      if (!strcmp(s, "true"))
+          return (T_TRUE);
     case 'i':
       if (!strcmp(s, "if"))
       	return (T_IF);
-      
+      if (!strcmp(s, "int"))
+          return (T_INT);      
       break;
     case 'p':
       if (!strcmp(s, "print"))
@@ -154,6 +166,9 @@ int scan(struct token *t) {
       break;
     case ';':
       t->token = T_SEMI;
+      break;
+    case ':':
+      t->token = T_COLON;
       break;
     case '{':
       t->token = T_LBRACE;
@@ -213,6 +228,14 @@ int scan(struct token *t) {
 	// If it's a recognised keyword, return that token
 	if (tokentype = keyword(Text)) {
 	  t->token = tokentype;
+    if (tokentype == T_FALSE){
+      t->token = T_FALSE;
+      t->intvalue = 0;
+    }
+    else if (tokentype == T_TRUE){
+      t->token = T_TRUE;
+      t->intvalue = 1;
+    }
 	  break;
 	}
 	// Not a recognised keyword, so it must be an identifier

@@ -21,6 +21,15 @@ void semi(void) {
   match(T_SEMI, ";");
 }
 
+// Match a colon and fetch the next token
+void colon(void) {
+  match(T_COLON, ":");
+}
+
+// Match an arrow and fetch the next token
+void arrow(void) {
+  match(T_ARROW, "->");
+}
 // Match a left brace and fetch the next token
 void lbrace(void) {
   match(T_LBRACE, "{");

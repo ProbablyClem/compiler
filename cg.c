@@ -29,8 +29,8 @@ void cgfuncpreamble(char *name) {
 
 // Print out a function postamble
 void cgfuncpostamble() {
-  fprintf(Outfile, "\t ret i32 0\n");
-  fprintf(Outfile, "} \n");
+  fprintf(Outfile, "ret i32 0\n");
+  fprintf(Outfile, "} \n\n");
 }
 
 //list all register
@@ -40,6 +40,10 @@ static int reg = 0;
 void freeall_registers(void)
 {
   reg = 0;
+}
+
+void free_registers(int r){
+  reg = r;
 }
 
 // Allocate a free register. Return the number of
@@ -64,29 +68,65 @@ int cgloadint(int value) {
   return(r);
 }
 
-// Load a value from a variable into a register.
+// Load an boolean value into a register.
 // Return the number of the register
-int cgloadglob(char *identifier) {
+int cgloadbool(int value) {
+
   // Get a new register
-  int r = alloc_register();
+  int r= alloc_register();
 
   // Print out the code to initialise it
-  fprintf(Outfile, "%%%d = load i32, i32* @%s\n", r, identifier);
+  fprintf(Outfile, "%%%d = add i1 0, %d\n", r, value);
+  return(r);
+}
+
+// Load a value from a variable into a register.
+// Return the number of the register
+int cgloadglob(int id) {
+  // Get a new register
+  int r = alloc_register();
+  if (Gsym[id].type == P_BOOL){
+    fprintf(Outfile, "%%%d = load i1, i1* @%s\n", r, Gsym[id].name);
+  }
+  else {
+    fprintf(Outfile, "%%%d = load i32, i32* @%s\n", r, Gsym[id].name);
+  }
   return (r);
 }
 
 //todo
 // Store a register's value into a variable
-int cgstorglob(int reg, char *identifier) {
-  fprintf(Outfile, "store i32 %%%d, i32* @%s\n", reg, identifier);
+int cgstorglob(int reg, int id) {
+  if (Gsym[id].type == P_BOOL){
+    fprintf(Outfile, "store i1 %%%d, i1* @%s\n", reg, Gsym[id].name);
+  }
+  else {
+    fprintf(Outfile, "store i32 %%%d, i32* @%s\n", reg, Gsym[id].name);
+  }
   return (reg);
 }
 
 // Generate a global symbol
-void cgglobsym(char *sym) {
-  fprintf(Header, "@%s = dso_local global i32 0, align 4\n", sym);
+void cgglobsym(int id) {
+  if (Gsym[id].type == P_BOOL){
+    fprintf(Header, "@%s = dso_local global i1 0, align 4\n", Gsym[id].name);
+  }
+  else {
+    fprintf(Header, "@%s = dso_local global i32 0, align 4\n", Gsym[id].name);
+  }
 }
 
+// Widen the value in the register from the old
+// to the new type, and return a register with
+// this new value
+int cgwiden(int r, int oldtype, int newtype) {
+  printf("old : %d",oldtype);
+  printf("new : %d",newtype);
+  if (oldtype == P_BOOL && newtype == P_INT){
+    r = cgbooltoi32(r);
+  }
+  return (r);
+}
 
 // Add two registers together and return
 // the number of the register with the result

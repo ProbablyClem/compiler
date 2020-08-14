@@ -14,17 +14,22 @@ static struct ASTnode *primary(void) {
   switch (Token.token) {
     case T_INTLIT:
       // For an INTLIT token, make a leaf AST node for it.
-      n = mkastleaf(A_INTLIT, Token.intvalue);
+      n = mkastleaf(A_INTLIT, P_NONE, Token.intvalue);
       break;
-
+    case T_FALSE : 
+      n = mkastleaf(A_BOOL, P_NONE, 0);
+      break;
+    case T_TRUE:
+      n = mkastleaf(A_BOOL, P_NONE, 1);
+      break;
     case T_IDENT:
       // Check that this identifier exists
       id = findglob(Text);
       if (id == -1)
-	fatals("Unknown variable", Text);
+        fatals("Unknown variable", Text);
 
       // Make a leaf AST node for it
-      n = mkastleaf(A_IDENT, id);
+      n = mkastleaf(A_IDENT, Gsym[id].type, id);
       break;
 
     default:
@@ -67,6 +72,7 @@ static int op_precedence(int tokentype) {
 // Parameter ptp is the previous token's precedence.
 struct ASTnode *binexpr(int ptp) {
   struct ASTnode *left, *right;
+  int lefttype, righttype;
   int tokentype;
 
   // Get the primary tree on the left.
@@ -88,9 +94,21 @@ struct ASTnode *binexpr(int ptp) {
     // precedence of our token to build a sub-tree
     right = binexpr(OpPrec[tokentype]);
 
+    // Ensure the two types are compatible.
+    lefttype = left->type;
+    righttype = right->type;
+    if (!type_compatible(&lefttype, &righttype, 0))
+      fatal("Incompatible types");
+
+    // Widen either side if required. type vars are A_WIDEN now
+    if (lefttype)
+      left = mkastunary(lefttype, right->type, left, 0);
+    if (righttype)
+      right = mkastunary(righttype, left->type, right, 0);
+
     // Join that sub-tree with ours. Convert the token
     // into an AST operation at the same time.
-    left = mkastnode(arithop(tokentype), left, NULL, right, 0);
+    left = mkastnode(arithop(tokentype), left->type, left, NULL, right, 0);
 
     // Update the details of the current token.
     // If we hit a semicolon or ')', return just the left node
