@@ -29,17 +29,26 @@ The output will be ./a.out
 # Compiler Architecture
 ## Lexer
 ### scan.c</br>
-Convert the code into token; </br>
+Convert the code into token. </br>
 Throw an error if the lexer don't recognize the input.
 
 ## Parser
 ### expr.c</br>
-Generate an AST from the tokens</br>
-The tree is generated with the token's priority found in `OpPrec[]` </br>
+Generate an AST from the tokens.</br>
+The tree is generated with the token's priority found in `OpPrec[]`. </br>
 Thrown an error if the input does't respect the grammar.
 ### tree.c
-
 Utils for generating AST nodes.
+
+### stmt.c
+Functions trees from statements such as functions or loops.
+
+### misc.c
+Utils requesting token such as colon().
+
+### types.c
+Functions managing types compatibilities.
+
 ## LLVM generator
 ### gen.c
 
@@ -53,10 +62,6 @@ Utils for generating llvm code.
 [Entry]</br>
 Open and close files and calls other files?
 
-### interp.c
-[Temporary]</br>
-Interpret the code at compile time to test the output.
-
 ### data.h
 Expose global variables.
 
@@ -65,6 +70,13 @@ Expose public functions.
 
 ### defs.h
 Public Enums
+
+### delc.c
+Utils for declaring variables or functions.
+
+### sym.c
+Functions managing the symbols tables.
+
 
 # Ressources
 Compiler tutorial : https://github.com/DoctorWkt/acwj </br>
