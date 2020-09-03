@@ -27,8 +27,7 @@ void cgpreamble();
 void cgpostamble();
 void cgfuncpreamble(int id);
 void cgfuncpostamble();
-int cgloadint(int value);
-int cgloadbool(int value);
+int cgload(int value);
 int cgloadglob(int id);
 int cgbooltoi32(int r1);
 int cgadd(int r1, int r2);
@@ -67,6 +66,7 @@ void fatal(char *s);
 void fatals(char *s1, char *s2);
 void fatald(char *s, int d);
 void fatalc(char *s, int c);
+int type(int value);
 
 // sym.c
 int findglob(char *s);

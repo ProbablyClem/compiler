@@ -1,7 +1,6 @@
 #include "defs.h"
 #include "data.h"
 #include "decl.h"
-#include <math.h>
 // Parsing of expressions
 
 // Parse a function call with a single expression
@@ -40,14 +39,7 @@ static struct ASTnode *primary(void) {
   switch (Token.token) {
     case T_INTLIT:
       // For an INTLIT token, make a leaf AST node for it.
-      // Make it a P_CHAR if it's within the P_CHAR range
-      if ((Token.intvalue) >= 0 && (Token.intvalue <= 1))
-	n = mkastleaf(A_INTLIT, P_BOOL, Token.intvalue);
-      else if ((Token.intvalue) > 1 && (Token.intvalue < pow(2, 8)))
-	n = mkastleaf(A_INTLIT, P_CHAR, Token.intvalue);
-      else if ((Token.intvalue) >= pow(2, 8) && (Token.intvalue < pow(2, 32)))
-	n = mkastleaf(A_INTLIT, P_I32, Token.intvalue);
-    else n = mkastleaf(A_INTLIT, P_I64, Token.intvalue);
+      	n = mkastleaf(A_INTLIT, type(Token.intvalue), Token.intvalue);
       break;
 
     case T_IDENT:

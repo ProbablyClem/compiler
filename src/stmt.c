@@ -226,7 +226,7 @@ static struct ASTnode *return_statement(void) {
 
   // Ensure we have 'return' '('
   match(T_RETURN, "return");
-  lparen();
+  // lparen();
 
   // Parse the following expression
   tree = binexpr(0);
@@ -234,18 +234,21 @@ static struct ASTnode *return_statement(void) {
   // Ensure this is compatible with the function's type
   returntype = tree->type;
   functype = Gsym[Functionid].type;
+  printf("returntype: %d, functype %d \n", returntype, functype);
   if (!type_compatible(&returntype, &functype, 1))
     fatal("Incompatible types");
 
+  printf("returntype: %d, functype %d \n", returntype, functype);
   // Widen the left if required.
   if (returntype)
     tree = mkastunary(returntype, functype, tree, 0);
-
+  
   // Add on the A_RETURN node
   tree = mkastunary(A_RETURN, P_NONE, tree, 0);
 
   // Get the ')'
-  rparen();
+  // rparen();
+  semi();
   return (tree);
 }
 
@@ -266,6 +269,8 @@ static struct ASTnode *single_statement(void) {
       return (while_statement());
     case T_FOR:
       return (for_statement());
+    case T_RETURN:
+      return(return_statement());
     default:
       fatald("Syntax error, token", Token.token);
   }

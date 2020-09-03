@@ -44,13 +44,13 @@ static int alloc_register(void)
 
 // Load an integer literal value into a register.
 // Return the number of the register
-int cgloadint(int value) {
+int cgload(int value) {
 
   // Get a new register
   int r= alloc_register();
-
+  printf("value : %d, type : %d,  primsize : %d\n", value, type(value), cgprimsize(type(value)));
   // Print out the code to initialise it
-  fprintf(Outfile, "%%%d = add i32 0, %d\n", r, value);
+  fprintf(Outfile, "%%%d = add i%d 0, %d\n", r, cgprimsize(type(value)), value);
   return(r);
 }
 
@@ -72,8 +72,8 @@ int cgloadglob(int id) {
   // Get a new register
   int r = alloc_register();
   int typesize = cgprimsize(Gsym[id].type);
-
-  fprintf(Outfile, "%%%d = load i%d, i%d* @%s\n", r, Gsym[id].name, typesize, typesize);
+  printf("%d\n", typesize);
+  fprintf(Outfile, "%%%d = load i%d, i%d* @%s\n", r, typesize, typesize, Gsym[id].name);
 
   return (r);
 }
@@ -102,12 +102,9 @@ void cgglobsym(int id) {
 // to the new type, and return a register with
 // this new value
 int cgwiden(int r, int oldtype, int newtype) {
-  printf("old : %d",oldtype);
-  printf("new : %d",newtype);
-  if (oldtype == P_BOOL && newtype == P_I32){
-    r = cgbooltoi32(r);
-  }
-  return (r);
+  int newreg = alloc_register();
+  fprintf(Outfile, "%%%d = zext i%d %%%d to i%d\n", newreg, cgprimsize(oldtype), r, cgprimsize(newtype));
+  return (newreg);
 }
 
 // Add two registers together and return
@@ -232,8 +229,14 @@ int cgprimsize(int type) {
 
 // Print out a function preamble
 void cgfuncpreamble(int id) {
-  fprintf(Outfile, "define i%d @%s() nounwind {\n", Gsym[id].name, cgprimsize(Gsym[id].type));
+  if (Gsym[id].type == P_VOID){
+    fprintf(Outfile, "define void @%s() nounwind {\n", Gsym[id].name);
+  }
+  else {
+  fprintf(Outfile, "define i%d @%s() nounwind {\n", cgprimsize(Gsym[id].type), Gsym[id].name);
+  }
   if (!strcmp(Gsym[id].name, "main")){
+    freeall_registers();
     fprintf(Outfile, "entry:\n");
   }
 }
@@ -258,5 +261,5 @@ int cgcall(int r, int id) {
 void cgreturn(int reg, int id) {
   // Generate code depending on the function's type
   int returntype = cgprimsize(Gsym[id].type);
-  fprintf(Outfile, "return i%d %%%d\n", returntype, reg);
+  fprintf(Outfile, "ret i%d %%%d\n", returntype, reg);
 }

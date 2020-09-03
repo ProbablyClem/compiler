@@ -1,6 +1,7 @@
 #include "defs.h"
 #include "data.h"
 #include "decl.h"
+#include <math.h>
 
 // Miscellaneous functions
 // Copyright (c) 2019 Warren Toomey, GPL3
@@ -74,4 +75,16 @@ void fatald(char *s, int d) {
 void fatalc(char *s, int c) {
   fprintf(stderr, "%s:%c on line %d\n", s, c, Line);
   exit(1);
+}
+
+//get and int return the type
+int type(int value){
+  if ((value) >= 0 && (value <= 1))
+	return P_BOOL;
+      else if ((value) > 1 && (value < pow(2, 8)))
+	return P_CHAR;
+      else if ((value) >= pow(2, 8) && (value < pow(2, 32)))
+	return P_I32;
+    else 
+  return P_I64;
 }

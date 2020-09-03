@@ -36,13 +36,13 @@ void main(int argc, char *argv[]) {
     exit(1);
   }
   // Create the output file
-  if ((Outfile = fopen("out.ll", "w")) == NULL) {
+  if ((Outfile = fopen("./build/out.ll", "w")) == NULL) {
     fprintf(stderr, "Unable to create out.ll: %s\n", strerror(errno));
     exit(1);
   }
 
   // Create the header file (temporary file containing everyhting in the header)
-  if ((Header = fopen("header.ll", "w")) == NULL) {
+  if ((Header = fopen("./build/header.ll", "w")) == NULL) {
     fprintf(stderr, "Unable to create header.ll: %s\n", strerror(errno));
     exit(1);
   }
@@ -61,13 +61,13 @@ void main(int argc, char *argv[]) {
 
   // append the content of Outfile into the header
 
-  if ((Outfile = fopen("out.ll", "r")) == NULL) {
-    fprintf(stderr, "Unable to read out.ll: %s\n", strerror(errno));
+  if ((Outfile = fopen("./build/out.ll", "r")) == NULL) {
+    fprintf(stderr, "Unable to read ./build/out.ll: %s\n", strerror(errno));
     exit(1);
   }
 
   // Create the header file (temporary file containing everyhting in the header)
-  if ((Header = fopen("header.ll", "a")) == NULL) {
+  if ((Header = fopen("./build/header.ll", "a")) == NULL) {
     fprintf(stderr, "Unable to appen to header.ll: %s\n", strerror(errno));
     exit(1);
   }
@@ -82,7 +82,7 @@ void main(int argc, char *argv[]) {
   fclose(Outfile);		// Close the output file and exit
   fclose(Header);
 
-  remove("out.ll"); //delete the body file
-  rename("header.ll", "out.ll"); //rename the header into the final file
+  remove("./build/out.ll"); //delete the body file
+  rename("./build/header.ll", "./build/out.ll"); //rename the header into the final file
   exit(0);
 }

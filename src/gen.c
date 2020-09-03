@@ -103,10 +103,10 @@ int genAST(struct ASTnode *n, int reg, int parentASTop) {
       return (NOREG);
     case A_FUNCTION:
       // Generate the function's preamble before the code
+      free_registers(1);
       cgfuncpreamble(n->v.id);
       genAST(n->left, NOREG, n->op);
       cgfuncpostamble();
-      free_registers(1);
       return (NOREG);
   }
 
@@ -141,9 +141,9 @@ int genAST(struct ASTnode *n, int reg, int parentASTop) {
       else
 	return (cgcompare_and_set(n->op, leftreg, rightreg));
     case A_INTLIT:
-      return (cgloadint(n->v.intvalue));
+      return (cgload(n->v.intvalue));
     case A_BOOL:
-      return (cgloadbool(n->v.intvalue));
+      return (cgload(n->v.intvalue));
     case A_IDENT:
       return (cgloadglob(n->v.id));
     case A_LVIDENT:
