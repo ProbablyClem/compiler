@@ -41,7 +41,9 @@ static struct ASTnode *primary(void) {
     case T_INTLIT:
       // For an INTLIT token, make a leaf AST node for it.
       // Make it a P_CHAR if it's within the P_CHAR range
-      if ((Token.intvalue) >= 0 && (Token.intvalue < pow(2, 8)))
+      if ((Token.intvalue) >= 0 && (Token.intvalue <= 1))
+	n = mkastleaf(A_INTLIT, P_BOOL, Token.intvalue);
+      else if ((Token.intvalue) > 1 && (Token.intvalue < pow(2, 8)))
 	n = mkastleaf(A_INTLIT, P_CHAR, Token.intvalue);
       else if ((Token.intvalue) >= pow(2, 8) && (Token.intvalue < pow(2, 32)))
 	n = mkastleaf(A_INTLIT, P_I32, Token.intvalue);

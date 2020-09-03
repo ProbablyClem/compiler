@@ -71,7 +71,6 @@ static struct ASTnode *assignment_statement(void) {
   if ((id = findglob(Text)) == -1) {
     fatals("Undeclared variable", Text);
   }
-  printf("text : %s; id : %d \n", Text, id);
   right = mkastleaf(A_LVIDENT, Gsym[id].type, id);
 
   // Ensure we have an equals sign

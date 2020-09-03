@@ -16,7 +16,6 @@ int type_compatible(int *left, int *right, int onlyright) {
   // Get the sizes for each type
   leftsize = genprimsize(*left);
   rightsize = genprimsize(*right);
-  printf("%d : %d\n", leftsize, rightsize);
 
   // Types with zero size are not
   // not compatible with anything
