@@ -19,9 +19,9 @@ enum {
   T_INTLIT, T_FALSE, T_TRUE, T_SEMI, T_COLON, T_ARROW, T_ASSIGN, T_IDENT,
   T_LBRACE, T_RBRACE, T_LPAREN, T_RPAREN,
   //Types,
-  T_INT, T_CHAR, T_VOID, T_BOOL,
+  T_I32, T_CHAR, T_VOID, T_BOOL, T_I64,
   // Keywords
-  T_PRINT, T_GLOBAL, T_IF, T_ELSE, T_WHILE, T_FOR, T_FN 
+  T_PRINT, T_GLOBAL, T_IF, T_ELSE, T_WHILE, T_FOR, T_FN, T_RETURN 
 };
 
 // Token structure
@@ -36,12 +36,12 @@ enum {
   A_ADD = 1, A_SUBTRACT, A_MULTIPLY, A_DIVIDE,
   A_EQ, A_NE, A_LT, A_GT, A_LE, A_GE,
   A_INTLIT, A_BOOL,
-  A_IDENT, A_LVIDENT, A_ASSIGN, A_PRINT, A_GLUE, A_IF, A_WHILE, A_FUNCTION, A_WIDEN
+  A_IDENT, A_LVIDENT, A_ASSIGN, A_PRINT, A_GLUE, A_IF, A_WHILE, A_FUNCTION, A_WIDEN, A_RETURN, A_FUNCCALL
 };
 
 // Primitive types
 enum {
-  P_NONE, P_VOID, P_CHAR, P_INT, P_BOOL
+  P_NONE, P_VOID, P_BOOL, P_CHAR, P_I32, P_I64
 };
 
 // Abstract Syntax Tree structure
@@ -67,7 +67,9 @@ enum {
 
 // Symbol table structure
 struct symtable {
-  char *name;                   // Name of a symbol
-  int type;                     // Primitive type for the symbol
-  int stype;                    // Structural type for the symbol
+  char *name;			// Name of a symbol
+  int type;			// Primitive type for the symbol
+  int stype;			// Structural type for the symbol
+  int endlabel;			// For S_FUNCTIONs, the end label
+  
 };

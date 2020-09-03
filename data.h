@@ -12,4 +12,5 @@ extern_ FILE *Outfile;
 extern_ FILE *Header;
 extern_ struct token Token;	// Last token scanned
 extern_ char Text[TEXTLEN + 1];	// Last identifier scanned
+extern_ int Functionid;         // Symbol id of the current function
 extern_ struct symtable Gsym[NSYMBOLS];	// Global symbol table

@@ -1,9 +1,35 @@
 #include "defs.h"
 #include "data.h"
 #include "decl.h"
-
+#include <math.h>
 // Parsing of expressions
-// Copyright (c) 2019 Warren Toomey, GPL3
+
+// Parse a function call with a single expression
+// argument and return its AST
+struct ASTnode *funccall(void) {
+  struct ASTnode *tree;
+  int id;
+
+  // Check that the identifier has been defined,
+  // then make a leaf node for it. XXX Add structural type test
+  if ((id = findglob(Text)) == -1) {
+    fatals("Undeclared function", Text);
+  }
+  // Get the '('
+  lparen();
+
+  // Parse the following expression
+  tree = binexpr(0);
+
+  // Build the function call AST node. Store the
+  // function's return type as this node's type.
+  // Also record the function's symbol-id
+  tree = mkastunary(A_FUNCCALL, Gsym[id].type, tree, id);
+
+  // Get the ')'
+  rparen();
+  return (tree);
+}
 
 // Parse a primary factor and return an
 // AST node representing it.
@@ -14,19 +40,30 @@ static struct ASTnode *primary(void) {
   switch (Token.token) {
     case T_INTLIT:
       // For an INTLIT token, make a leaf AST node for it.
-      n = mkastleaf(A_INTLIT, P_NONE, Token.intvalue);
+      // Make it a P_CHAR if it's within the P_CHAR range
+      if ((Token.intvalue) >= 0 && (Token.intvalue < pow(2, 8)))
+	n = mkastleaf(A_INTLIT, P_CHAR, Token.intvalue);
+      else if ((Token.intvalue) >= pow(2, 8) && (Token.intvalue < pow(2, 32)))
+	n = mkastleaf(A_INTLIT, P_I32, Token.intvalue);
+    else n = mkastleaf(A_INTLIT, P_I64, Token.intvalue);
       break;
-    case T_FALSE : 
-      n = mkastleaf(A_BOOL, P_NONE, 0);
-      break;
-    case T_TRUE:
-      n = mkastleaf(A_BOOL, P_NONE, 1);
-      break;
+
     case T_IDENT:
-      // Check that this identifier exists
+      // This could be a variable or a function call.
+      // Scan in the next token to find out
+      scan(&Token);
+
+      // It's a '(', so a function call
+      if (Token.token == T_LPAREN)
+	return (funccall());
+
+      // Not a function call, so reject the new token
+      reject_token(&Token);
+
+      // Check that the variable exists. XXX Add structural type test
       id = findglob(Text);
       if (id == -1)
-        fatals("Unknown variable", Text);
+	fatals("Unknown variable", Text);
 
       // Make a leaf AST node for it
       n = mkastleaf(A_IDENT, Gsym[id].type, id);

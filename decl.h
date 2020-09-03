@@ -3,7 +3,7 @@
 // Copyright (c) 2019 Warren Toomey, GPL3
 // scan.c
 int scan(struct token *t);
-
+void reject_token(struct token *t);
 // tree.c
 struct ASTnode *mkastnode(int op, int type, struct ASTnode *left,
 			  struct ASTnode *mid,
@@ -18,13 +18,14 @@ void genpostamble();
 void genfreeregs();
 void genprintint(int reg);
 void genglobsym(int id);
+int genprimsize(int type);
 
 // cg.c
 void freeall_registers(void);
 void free_registers(int r);
 void cgpreamble();
 void cgpostamble();
-void cgfuncpreamble(char *name);
+void cgfuncpreamble(int id);
 void cgfuncpostamble();
 int cgloadint(int value);
 int cgloadbool(int value);
@@ -42,13 +43,16 @@ int cgcompare_and_set(int ASTop, int r1, int r2);
 int cgcompare_and_jump(int ASTop, int r1, int r2, int label);
 void cglabel(int l);
 void cgjump(int l);
+int cgprimsize(int type);
+int cgcall(int r, int id);
+void cgreturn(int reg, int id);
 
 // expr.c
 struct ASTnode *binexpr(int ptp);
+struct ASTnode *funccall(void);
 
 // stmt.c
 struct ASTnode *compound_statement(void);
-
 // misc.c
 void match(int t, char *what);
 void semi(void);

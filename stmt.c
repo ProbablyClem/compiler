@@ -34,14 +34,14 @@ static struct ASTnode *print_statement(void) {
   tree = binexpr(0);
 
   // Ensure the two types are compatible.
-  lefttype = P_INT;
+  lefttype = P_I32;
   righttype = tree->type;
   if (!type_compatible(&lefttype, &righttype, 0))
     fatal("Incompatible types");
 
   // Widen the tree if required. 
   if (righttype)
-    tree = mkastunary(righttype, P_INT, tree, 0);
+    tree = mkastunary(righttype, P_I32, tree, 0);
 
   // Make an print AST tree
   tree = mkastunary(A_PRINT, P_NONE, tree, 0);
@@ -58,14 +58,20 @@ static struct ASTnode *assignment_statement(void) {
   struct ASTnode *left, *right, *tree;
   int lefttype, righttype;
   int id;
-
   // Ensure we have an identifier
   ident();
 
+  // This could be a variable or a function call.
+  // If next token is '(', it's a function call
+  if (Token.token == T_LPAREN)
+    return (funccall());
+
+  
   // Check it's been defined then make a leaf node for it
   if ((id = findglob(Text)) == -1) {
     fatals("Undeclared variable", Text);
   }
+  printf("text : %s; id : %d \n", Text, id);
   right = mkastleaf(A_LVIDENT, Gsym[id].type, id);
 
   // Ensure we have an equals sign
@@ -90,7 +96,7 @@ static struct ASTnode *assignment_statement(void) {
   }
   else{
   // Make an assignment AST tree
-  tree = mkastnode(A_ASSIGN, P_INT, left, NULL, right, 0); 
+  tree = mkastnode(A_ASSIGN, P_I32, left, NULL, right, 0); 
   }
   
 
@@ -210,6 +216,40 @@ static struct ASTnode *for_statement(void) {
   return (mkastnode(A_GLUE, P_NONE, preopAST, NULL, tree, 0));
 }
 
+// Parse a return statement and return its AST
+static struct ASTnode *return_statement(void) {
+  struct ASTnode *tree;
+  int returntype, functype;
+
+  // Can't return a value if function returns P_VOID
+  if (Gsym[Functionid].type == P_VOID)
+    fatal("Can't return from a void function");
+
+  // Ensure we have 'return' '('
+  match(T_RETURN, "return");
+  lparen();
+
+  // Parse the following expression
+  tree = binexpr(0);
+
+  // Ensure this is compatible with the function's type
+  returntype = tree->type;
+  functype = Gsym[Functionid].type;
+  if (!type_compatible(&returntype, &functype, 1))
+    fatal("Incompatible types");
+
+  // Widen the left if required.
+  if (returntype)
+    tree = mkastunary(returntype, functype, tree, 0);
+
+  // Add on the A_RETURN node
+  tree = mkastunary(A_RETURN, P_NONE, tree, 0);
+
+  // Get the ')'
+  rparen();
+  return (tree);
+}
+
 // Parse a single statement
 // and return its AST
 static struct ASTnode *single_statement(void) {
@@ -217,7 +257,6 @@ static struct ASTnode *single_statement(void) {
     case T_PRINT:
       return (print_statement());
     case T_GLOBAL:
-    // var_declaration();
       global_declaration();
       return (NULL);		// No AST generated here
     case T_IDENT:

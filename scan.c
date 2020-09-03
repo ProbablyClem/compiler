@@ -3,7 +3,17 @@
 #include "decl.h"
 
 // Lexical scanning
-// Copyright (c) 2019 Warren Toomey, GPL3
+
+// A pointer to a rejected token
+static struct token *Rejtoken = NULL;
+
+// Reject the token that we just scanned
+void reject_token(struct token *t) {
+  if (Rejtoken != NULL)
+    fatal("Can't reject token twice");
+  Rejtoken = t;
+}
+
 
 // Return the position of character c
 // in string s, or -1 if c not found
@@ -122,12 +132,22 @@ static int keyword(char *s) {
     case 'i':
       if (!strcmp(s, "if"))
       	return (T_IF);
-      if (!strcmp(s, "int"))
-          return (T_INT);      
+      if (!strcmp(s, "i32"))
+          return (T_I32);
+      if (!strcmp(s, "i64"))
+          return (T_I64);      
       break;
     case 'p':
       if (!strcmp(s, "print"))
       	return (T_PRINT);
+      break;
+    case 'r':
+    if (!strcmp(s, "return"))
+      	return (T_RETURN);
+    break;
+    case 'v':
+      if(!strcmp(s, "void"))
+        return(T_VOID);
       break;
     case 'w':
       if(!strcmp(s, "while"))
@@ -143,6 +163,13 @@ static int keyword(char *s) {
 int scan(struct token *t) {
   int c, tokentype;
 
+  // If we have any rejected token, return it
+  if (Rejtoken != NULL) {
+    t = Rejtoken;
+    Rejtoken = NULL;
+    return (1);
+  }
+
   // Skip whitespace
   c = skip();
 
@@ -156,7 +183,12 @@ int scan(struct token *t) {
       t->token = T_PLUS;
       break;
     case '-':
-      t->token = T_MINUS;
+      if ((c = next()) == '>') {
+	      t->token = T_ARROW;
+      } else {
+	        putback(c);
+        	t->token = T_MINUS;
+      }
       break;
     case '*':
       t->token = T_STAR;

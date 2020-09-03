@@ -19,20 +19,6 @@ void cgpostamble(){
   fprintf(Outfile, "declare i32 @printf(i8*, i32)");
 }
 
-// Print out a function preamble
-void cgfuncpreamble(char *name) {
-  fprintf(Outfile, "define i32 @%s() nounwind {\n", name);
-  if (!strcmp(name, "main")){
-    fprintf(Outfile, "entry:\n");
-  }
-}
-
-// Print out a function postamble
-void cgfuncpostamble() {
-  fprintf(Outfile, "ret i32 0\n");
-  fprintf(Outfile, "} \n\n");
-}
-
 //list all register
 static int regList[10];
 static int reg = 0;
@@ -85,35 +71,31 @@ int cgloadbool(int value) {
 int cgloadglob(int id) {
   // Get a new register
   int r = alloc_register();
-  if (Gsym[id].type == P_BOOL){
-    fprintf(Outfile, "%%%d = load i1, i1* @%s\n", r, Gsym[id].name);
-  }
-  else {
-    fprintf(Outfile, "%%%d = load i32, i32* @%s\n", r, Gsym[id].name);
-  }
+  int typesize = cgprimsize(Gsym[id].type);
+
+  fprintf(Outfile, "%%%d = load i%d, i%d* @%s\n", r, Gsym[id].name, typesize, typesize);
+
   return (r);
 }
 
 //todo
 // Store a register's value into a variable
 int cgstorglob(int reg, int id) {
-  if (Gsym[id].type == P_BOOL){
-    fprintf(Outfile, "store i1 %%%d, i1* @%s\n", reg, Gsym[id].name);
-  }
-  else {
-    fprintf(Outfile, "store i32 %%%d, i32* @%s\n", reg, Gsym[id].name);
-  }
+
+  int typesize = cgprimsize(Gsym[id].type);
+  fprintf(Outfile, "store i%d %%%d, i%d* @%s\n",typesize, reg,typesize, Gsym[id].name);
+
   return (reg);
 }
 
 // Generate a global symbol
 void cgglobsym(int id) {
-  if (Gsym[id].type == P_BOOL){
-    fprintf(Header, "@%s = dso_local global i1 0, align 4\n", Gsym[id].name);
-  }
-  else {
-    fprintf(Header, "@%s = dso_local global i32 0, align 4\n", Gsym[id].name);
-  }
+
+  int typesize;
+  // Get the size of the type
+  typesize = cgprimsize(Gsym[id].type);
+
+  fprintf(Header, "@%s = dso_local global i%d 0, align 4\n", Gsym[id].name, typesize);
 }
 
 // Widen the value in the register from the old
@@ -122,7 +104,7 @@ void cgglobsym(int id) {
 int cgwiden(int r, int oldtype, int newtype) {
   printf("old : %d",oldtype);
   printf("new : %d",newtype);
-  if (oldtype == P_BOOL && newtype == P_INT){
+  if (oldtype == P_BOOL && newtype == P_I32){
     r = cgbooltoi32(r);
   }
   return (r);
@@ -233,4 +215,48 @@ void cglabel(int l) {
 // Generate a jump to a label
 void cgjump(int l) {
   fprintf(Outfile, "br label %%L%d\n", l);
+}
+
+// Array of type sizes in P_XXX order.
+// 0 means no size. P_NONE, P_VOID,P_BOOL, P_CHAR, P_INT, P_LONG
+static int psize[] = { 0, 0, 1, 8, 32, 64 };
+
+// Given a P_XXX type value, return the
+// size of a primitive type in bytes.
+int cgprimsize(int type) {
+  // Check the type is valid
+  if (type < P_NONE || type > P_I64)
+    fatal("Bad type in cgprimsize()");
+  return (psize[type]);
+}
+
+// Print out a function preamble
+void cgfuncpreamble(int id) {
+  fprintf(Outfile, "define i%d @%s() nounwind {\n", Gsym[id].name, cgprimsize(Gsym[id].type));
+  if (!strcmp(Gsym[id].name, "main")){
+    fprintf(Outfile, "entry:\n");
+  }
+}
+
+// Print out a function postamble
+void cgfuncpostamble() {
+  fprintf(Outfile, "} \n\n");
+}
+
+// Call a function with one argument from the given register
+// Return the register with the result
+int cgcall(int r, int id) {
+  int fntype = cgprimsize(Gsym[id].type);
+  char* fnname = Gsym[id].name;
+  // Get a new register
+  int outr = alloc_register();
+  fprintf(Outfile, "%%%d = call i%d () @%s()\n",outr , fntype, fnname);
+  return (outr);
+}
+
+// Generate code to return a value from a function
+void cgreturn(int reg, int id) {
+  // Generate code depending on the function's type
+  int returntype = cgprimsize(Gsym[id].type);
+  fprintf(Outfile, "return i%d %%%d\n", returntype, reg);
 }
