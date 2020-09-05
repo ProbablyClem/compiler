@@ -106,7 +106,7 @@ int genAST(struct ASTnode *n, int reg, int parentASTop) {
       free_registers(1);
       cgfuncpreamble(n->v.id);
       genAST(n->left, NOREG, n->op);
-      cgfuncpostamble();
+      cgfuncpostamble(n->v.id);
       return (NOREG);
   }
 
@@ -120,13 +120,13 @@ int genAST(struct ASTnode *n, int reg, int parentASTop) {
 
   switch (n->op) {
     case A_ADD:
-      return (cgadd(leftreg, rightreg));
+      return (cgadd(leftreg, rightreg, n->type));
     case A_SUBTRACT:
-      return (cgsub(leftreg, rightreg));
+      return (cgsub(leftreg, rightreg, n->type));
     case A_MULTIPLY:
-      return (cgmul(leftreg, rightreg));
+      return (cgmul(leftreg, rightreg, n->type));
     case A_DIVIDE:
-      return (cgdiv(leftreg, rightreg));
+      return (cgdiv(leftreg, rightreg, n->type));
     case A_EQ:
     case A_NE:
     case A_LT:

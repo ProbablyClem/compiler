@@ -234,11 +234,8 @@ static struct ASTnode *return_statement(void) {
   // Ensure this is compatible with the function's type
   returntype = tree->type;
   functype = Gsym[Functionid].type;
-  printf("returntype: %d, functype %d \n", returntype, functype);
   if (!type_compatible(&returntype, &functype, 1))
     fatal("Incompatible types");
-
-  printf("returntype: %d, functype %d \n", returntype, functype);
   // Widen the left if required.
   if (returntype)
     tree = mkastunary(returntype, functype, tree, 0);

@@ -12,10 +12,12 @@
 // Token types
 enum {
   T_EOF,
+  //operator
   T_PLUS, T_MINUS,
   T_STAR, T_SLASH,
   T_EQ, T_NE,
   T_LT, T_GT, T_LE, T_GE,
+  //structural tokens
   T_INTLIT, T_FALSE, T_TRUE, T_SEMI, T_COLON, T_ARROW, T_ASSIGN, T_IDENT,
   T_LBRACE, T_RBRACE, T_LPAREN, T_RPAREN,
   //Types,

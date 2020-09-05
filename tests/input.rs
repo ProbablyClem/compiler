@@ -1,16 +1,11 @@
-fn func() -> i64 {
-  global y : bool;
-  global i : i32;
-  y = 1;
-  print y;
-  i = y;
-  return y;
+fn fred() -> i32 {
+  return 20;
 }
 
 fn main() -> void {
-  i = 0;
-  i = i +1;
-  print i;
-  print func(15);
+  global result : i32;
+  print 10;
+  result = fred(15);
+  print result;
+  print fred(15)+10;
 }
-

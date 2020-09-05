@@ -48,7 +48,6 @@ int cgload(int value) {
 
   // Get a new register
   int r= alloc_register();
-  printf("value : %d, type : %d,  primsize : %d\n", value, type(value), cgprimsize(type(value)));
   // Print out the code to initialise it
   fprintf(Outfile, "%%%d = add i%d 0, %d\n", r, cgprimsize(type(value)), value);
   return(r);
@@ -72,7 +71,6 @@ int cgloadglob(int id) {
   // Get a new register
   int r = alloc_register();
   int typesize = cgprimsize(Gsym[id].type);
-  printf("%d\n", typesize);
   fprintf(Outfile, "%%%d = load i%d, i%d* @%s\n", r, typesize, typesize, Gsym[id].name);
 
   return (r);
@@ -110,38 +108,37 @@ int cgwiden(int r, int oldtype, int newtype) {
 // Add two registers together and return
 // the number of the register with the result
 //the result is stored into r1
-int cgadd(int r1, int r2) {
+int cgadd(int r1, int r2, int type) {
   // Get a new register
   int r= alloc_register();
-
-  fprintf(Outfile, "%%%d = add i32 %%%d, %%%d\n", r,r1, r2);
+  fprintf(Outfile, "%%%d = add i%d %%%d, %%%d\n", r,cgprimsize(type),r1, r2);
   return(r);
 }
 
 // Subtract the second register from the first and
 // return the number of the register with the result
-int cgsub(int r1, int r2) {
+int cgsub(int r1, int r2, int type) {
   // Get a new register
   int r= alloc_register();
-  fprintf(Outfile, "%%%d = sub i32 %%%d, %%%d\n", r,r1, r2);
+  fprintf(Outfile, "%%%d = sub i%d %%%d, %%%d\n", r,cgprimsize(type) ,r1, r2);
   return(r);
 }
 
 // Multiply two registers together and return
 // the number of the register with the result
-int cgmul(int r1, int r2) {
+int cgmul(int r1, int r2, int type) {
   // Get a new register
   int r= alloc_register();
-  fprintf(Outfile, "%%%d = mul i32 %%%d, %%%d\n", r, r1, r2);
+  fprintf(Outfile, "%%%d = mul i%d %%%d, %%%d\n", r,cgprimsize(type) , r1, r2);
   return(r);
 }
 
 // Divide the first register by the second and
 // return the number of the register with the result
-int cgdiv(int r1, int r2) {
+int cgdiv(int r1, int r2, int type) {
   // Get a new register
   int r= alloc_register();
-  fprintf(Outfile, "%%%d = udiv i32 %%%d, %%%d\n", r,r1, r2);
+  fprintf(Outfile, "%%%d = udiv i% %%%d, %%%d\n", r,cgprimsize(type) ,r1, r2);
   return(r);
 }
 
@@ -178,7 +175,6 @@ static char *cmplist[] =
 
 // Compare two registers and set if true.
 int cgcompare_and_set(int ASTop, int r1, int r2) {
-
   // Check the range of the AST operation
   if (ASTop < A_EQ || ASTop > A_GE)
     fatal("Bad ASTop in cgcompare_and_set()");
@@ -242,7 +238,10 @@ void cgfuncpreamble(int id) {
 }
 
 // Print out a function postamble
-void cgfuncpostamble() {
+void cgfuncpostamble(int id) {
+  if (Gsym[id].type == P_VOID){
+    fprintf(Outfile, "ret void\n");
+  }
   fprintf(Outfile, "} \n\n");
 }
 

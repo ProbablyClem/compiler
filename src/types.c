@@ -36,6 +36,7 @@ int type_compatible(int *left, int *right, int onlyright) {
   if (rightsize < leftsize) {
     if (onlyright)
       return (0);
+    *left = 0;
     *right = A_WIDEN;
     return (1);
   }
@@ -44,3 +45,4 @@ int type_compatible(int *left, int *right, int onlyright) {
   *left = *right = 0;
   return (1);
 }
+
